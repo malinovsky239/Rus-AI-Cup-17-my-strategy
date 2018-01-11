@@ -1,0 +1,20 @@
+This is a game strategy that I implemented for [Russian AI Cup 2017: Code Wars](http://russianaicup.ru/) in November 2017 - January 2018. *Russian AI Cup* is an annual online competition between game strategies. This year's rules (both in English and in Russian) can be found [here](https://github.com/Russian-AI-Cup-2017/Tutorial).
+
+To understand how this year's game works, watch a couple of matches where my strategy participated (click on "View Game"):
+* [with buildings](http://russianaicup.ru/game/view/316216),
+* [without buildings](http://russianaicup.ru/game/view/320460).
+
+*Noteworthy points:*
+
+* **Main challenge:** the given API doesn't allow to control units directly. Instead, you should control "a virtual computer mouse" as the only way to select units is by specifying coordinates of a bounding rectangle.
+* With the given API, it's not easy to chain different actions (you can execute only one per turn). In order to do that and to avoid chaos in code, I implemented the **Command design pattern**: see base class [`Action`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/Action.h) and 10 classes derived from it.
+* Several times ([1](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/NuclearAttackHandler.cpp#L25), [2](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/DecisionMakerForGameWithoutBuildings.cpp#L317), [3](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/DecisionMakerForGameWithBuildings.cpp#L87)) I used the same **approximation technique** to estimate desired min/max values fast: instead of doing heavy precise calculations, I subdivide the playing field into `n` equal squares (where `n` is the field's side length) and treat each such square as a single point containing all of the square's units.
+* Entry point is [`MyStrategy`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/MyStrategy.h) class. Each tick, entry point is [`MyStrategy::move()`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/MyStrategy.cpp#L8).
+* Planned actions are stored in `std::deque` (urgent ones are added to its head when its first element stands for the beginning of a new chain of actions, all the other ones - to its tail).
+* I implemented two different strategies for games with and without buildings (in [`DecisionMakerForGameWithBuildings`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/DecisionMakerForGameWithBuildings.cpp) and [`DecisionMakerForGameWithoutBuildings`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/DecisionMakerForGameWithoutBuildings.cpp) respectively). However, they also share some common methods. These methods reside in the base class [`DecisionMaker`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/DecisionMaker.h), as well as in its helper classes [`NuclearAttackHandler`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/NuclearAttackHandler.cpp), [`MotionlessnessChecker`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/MotionlessnessChecker.cpp) and [`VehicleValueEstimator`](https://github.com/malinovsky239/Rus-AI-Cup-17-my-strategy/blob/master/VehicleValueEstimator.cpp).
+* This repository contains only my code. Files which define the game rules and API for the strategy can be downloaded [here](http://russianaicup.ru/s/1513866485793/assets/cgdks/cpp-cgdk.zip).
+
+As for results,
+* In the official track, I advanced to *Round 2* (Top-360 out of about 1000 participants) and finished on the [<code>123<sup>rd</sup></code>](http://russianaicup.ru/contest/3/standings/page/2) place.
+* In the "Sandbox", I finished on the [<code>177<sup>th</sup></code>](http://russianaicup.ru/contest/5/standings/page/2) place.
+* Unofficially, the "Sandbox" is still running, and my strategy is generally climbing upwards by small steps - currently around [<code>150<sup>th</sup></code>](http://russianaicup.ru/contest/1/standings/page/2) place.
